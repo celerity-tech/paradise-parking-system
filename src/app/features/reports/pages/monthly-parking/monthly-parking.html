@@ -2,11 +2,11 @@
   <h1 class="text-3xl font-medium text-text-900 mt-6">Monthly Paid Parking</h1>
 
   <div class="mt-6 grid md:grid-cols-1 lg:grid-cols-1 gap-6">
-    <app-button variant="primary" (click)="addVehicle()">Add New</app-button>
+    <app-button variant="primary" (click)="onAddVehicle()">Add New</app-button>
     <app-stat-card
-      [icon]="Car"
+      [icon]="CarIcon"
       label="Total Entries"
-      [value]="1"
+      [value]="totalEntries()"
       iconBgClass="bg-blue-200 text-blue-700"
       class="w-1/4"
     ></app-stat-card>
@@ -16,7 +16,7 @@
   <div class="w-full overflow-x-auto bg-white rounded-lg shadow-sm border border-slate-200 mt-2">
     <table cdk-table [dataSource]="dataSource" class="w-full border-collapse">
       <ng-container cdkColumnDef="vehicleType">
-        <th cdk-header-cell *cdkHeaderCellDef class="text-left px-6 py-4 text-xs text-white whitespace-nowrap">VEHICLE TPYE</th>
+        <th cdk-header-cell *cdkHeaderCellDef class="text-left px-6 py-4 text-xs text-white whitespace-nowrap uppercase">Vehicle Type</th>
         <td cdk-cell *cdkCellDef="let element" class="px-6 py-4 text-text-600 text-sm">
           <div
             class="flex items-center justify-center w-10 h-10 rounded-full border"
@@ -25,10 +25,10 @@
               'bg-sky-50 border-sky-200 text-sky-700': element.vehicleType === 'MOTORCYCLE',
             }"
           >
-            @if (element.vehicleType == 'CAR') {
-              <lucide-angular [img]="Car" class="w-5 h-5"></lucide-angular>
-            } @else if (element.vehicleType == 'MOTORCYCLE') {
-              <lucide-angular [img]="Motorbike" class="w-5 h-5"></lucide-angular>
+            @if (element.vehicleType === 'CAR') {
+              <lucide-angular [img]="CarIcon" class="w-5 h-5"></lucide-angular>
+            } @else if (element.vehicleType === 'MOTORCYCLE') {
+              <lucide-angular [img]="MotorbikeIcon" class="w-5 h-5"></lucide-angular>
             }
           </div>
         </td>
@@ -73,11 +73,11 @@
         </td>
       </ng-container>
 
-      <tr cdk-header-row *cdkHeaderRowDef="COLUMNS" class="bg-secondary"></tr>
-      <tr cdk-row *cdkRowDef="let row; columns: COLUMNS;" class="border-b border-slate-200 hover:bg-emerald-50 transition-colors"></tr>
+      <tr cdk-header-row *cdkHeaderRowDef="DISPLAYED_COLUMNS" class="bg-secondary"></tr>
+      <tr cdk-row *cdkRowDef="let row; columns: DISPLAYED_COLUMNS;" class="border-b border-slate-200 hover:bg-emerald-50 transition-colors"></tr>
     </table>
   </div>
 
-  <h2 class="text-2xl font-semibold mt-6">Vehicle Type</h2>
-  <div echarts (chartInit)="onChartInit($event)" [options]="option" class="md:w-1/2 mt-4 rounded-xl shadow-sm"></div>
+  <h2 class="text-2xl font-semibold mt-6">Vehicle Type Distribution</h2>
+  <div echarts (chartInit)="onChartInit($event)" [options]="chartOptions" class="md:w-1/2 mt-4 rounded-xl shadow-sm"></div>
 </section>

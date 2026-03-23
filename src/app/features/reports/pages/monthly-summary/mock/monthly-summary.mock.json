@@ -1,0 +1,73 @@
+{
+  "data": {
+    "monthlySummary": {
+      "kpis": {
+        "totalRevenue": 98040,
+        "averageDailyRevenue": 3163,
+        "totalEntries": 1922
+      },
+      "revenueByStream": {
+        "hourly": 68628,
+        "overnight": 19608,
+        "monthly": 9804
+      },
+      "revenueByVehicleType": {
+        "car": 57500,
+        "motorcycle": 21040,
+        "truck": 19500
+      },
+      "dailyLogs": [
+        {
+          "date": "2026-03-31",
+          "totalEntries": 87,
+          "totalRevenue": 3930,
+          "revenueByStream": {
+            "hourly": 2751,
+            "overnight": 786,
+            "monthly": 393
+          }
+        },
+        {
+          "date": "2026-03-30",
+          "totalEntries": 46,
+          "totalRevenue": 2660,
+          "revenueByStream": {
+            "hourly": 1862,
+            "overnight": 532,
+            "monthly": 266
+          }
+        },
+        {
+          "date": "2026-03-29",
+          "totalEntries": 32,
+          "totalRevenue": 2260,
+          "revenueByStream": {
+            "hourly": 1582,
+            "overnight": 452,
+            "monthly": 226
+          }
+        },
+        {
+          "date": "2026-03-28",
+          "totalEntries": 70,
+          "totalRevenue": 3680,
+          "revenueByStream": {
+            "hourly": 2576,
+            "overnight": 736,
+            "monthly": 368
+          }
+        },
+        {
+          "date": "2026-03-27",
+          "totalEntries": 55,
+          "totalRevenue": 2910,
+          "revenueByStream": {
+            "hourly": 2037,
+            "overnight": 582,
+            "monthly": 291
+          }
+        }
+      ]
+    }
+  }
+}
