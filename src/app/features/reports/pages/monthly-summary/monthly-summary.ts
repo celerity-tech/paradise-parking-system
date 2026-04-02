@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject, DestroyRef, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MonthlyTransactionsGQL } from '../../../../../graphql/generated/graphql';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -53,7 +55,10 @@ export const MONTH_YEAR_FORMATS = {
     { provide: MAT_DATE_FORMATS, useValue: MONTH_YEAR_FORMATS },
   ],
 })
-export class MonthlySummary {
+export class MonthlySummary implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly monthlyTransactionsGQL = inject(MonthlyTransactionsGQL);
+
   readonly BanknoteIcon = Banknote;
   readonly CarIcon = Car;
   readonly ClockIcon = Clock;
@@ -96,7 +101,7 @@ export class MonthlySummary {
     );
 
     datepicker.close();
-    this.loadMockData(); // reload on change
+    this.loadData();
   }
 
   vehicleChartInstance?: ECharts;
@@ -196,12 +201,33 @@ export class MonthlySummary {
   dataSource = new MatTableDataSource<any>([]);
 
   ngOnInit(): void {
-    this.loadMockData();
+    this.loadData();
   }
 
-  private loadMockData(): void {
-    const daysInMonth = this.dateControl.value?.daysInMonth ?? 30;
-    const mockData = [];
+  private loadData(): void {
+    const selectedDate = this.dateControl.value ?? DateTime.now();
+    const daysInMonth = selectedDate.daysInMonth ?? 30;
+    const targetYear = selectedDate.year;
+    const targetMonth = selectedDate.month;
+
+    this.monthlyTransactionsGQL
+      .watch({ variables: { year: targetYear, month: targetMonth }, fetchPolicy: 'network-only' })
+      .valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          if (!response.data || !response.data.monthlyTransactions) return;
+          const transactions = response.data.monthlyTransactions;
+          this.processTransactions(transactions, daysInMonth, selectedDate);
+        },
+        error: (err) => {
+          console.error('Error loading monthly transactions:', err);
+        },
+      });
+  }
+
+  private processTransactions(transactions: any[], daysInMonth: number, selectedDate: DateTime): void {
+    const dataByDay = new Map<number, any>();
+    
     let cumulativeRevenue = 0;
     let totalCarRev = 0;
     let totalMotorRev = 0;
@@ -210,62 +236,91 @@ export class MonthlySummary {
     let totalHourlyRev = 0;
     let totalOvernightRev = 0;
     let totalMonthlyStreamRev = 0;
-    
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      dataByDay.set(day, {
+        carAmount: 0,
+        motorAmount: 0,
+        truckAmount: 0,
+        carRevenue: 0,
+        motorRevenue: 0,
+        truckRevenue: 0,
+        hourlyRevenue: 0,
+        overnightRevenue: 0,
+        monthlyStreamRevenue: 0,
+        totalEntries: 0,
+        totalRevenue: 0,
+      });
+    }
+
+    transactions.forEach(t => {
+      if (!t.occuranceDate) return;
+      
+      const occurDate = DateTime.fromISO(t.occuranceDate);
+      if (!occurDate.isValid) return;
+      
+      const day = occurDate.day;
+      const dayData = dataByDay.get(day);
+      if (!dayData) return;
+
+      const fee = t.parkingFee ?? 0;
+
+      if (t.vehicleType === 'CAR') {
+        dayData.carAmount++;
+        dayData.carRevenue += fee;
+        totalCarRev += fee;
+      } else if (t.vehicleType === 'MOTORCYCLE') {
+        dayData.motorAmount++;
+        dayData.motorRevenue += fee;
+        totalMotorRev += fee;
+      } else if (t.vehicleType === 'TRUCK') {
+        dayData.truckAmount++;
+        dayData.truckRevenue += fee;
+        totalTruckRev += fee;
+      }
+
+      if (t.rateType === 'HOURLY') {
+        dayData.hourlyRevenue += fee;
+        totalHourlyRev += fee;
+      } else if (t.rateType === 'OVERNIGHT') {
+        dayData.overnightRevenue += fee;
+        totalOvernightRev += fee;
+      } else if (t.rateType === 'MONTHLY') {
+        dayData.monthlyStreamRevenue += fee;
+        totalMonthlyStreamRev += fee;
+      }
+
+      dayData.totalEntries++;
+      dayData.totalRevenue += fee;
+      
+      cumulativeRevenue += fee;
+      entries++;
+    });
+
     const hourlyDailyRev: number[] = [];
     const overnightDailyRev: number[] = [];
     const monthlyDailyRev: number[] = [];
     const days: string[] = [];
+    const tableData: any[] = [];
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = this.dateControl.value?.set({ day }) ?? DateTime.now().set({ day });
-      
-      const carCount = Math.floor(Math.random() * 50) + 10;
-      const motorCount = Math.floor(Math.random() * 30) + 5;
-      const truckCount = Math.floor(Math.random() * 10) + 2;
-      
-      const carRev = carCount * 50; 
-      const motorRev = motorCount * 20;
-      const truckRev = truckCount * 150;
+      const date = selectedDate.set({ day });
+      const dayData = dataByDay.get(day);
+      if (!dayData) continue;
 
-      // Streams
-      const hourlyRev = (carRev + motorRev + truckRev) * 0.7;
-      const overnightRev = (carRev + motorRev + truckRev) * 0.2;
-      const monthlyStreamRev = (carRev + motorRev + truckRev) * 0.1;
-
-      totalCarRev += carRev;
-      totalMotorRev += motorRev;
-      totalTruckRev += truckRev;
-      totalHourlyRev += hourlyRev;
-      totalOvernightRev += overnightRev;
-      totalMonthlyStreamRev += monthlyStreamRev;
-      
-      cumulativeRevenue += (carRev + motorRev + truckRev);
-      entries += (carCount + motorCount + truckCount);
-
-      hourlyDailyRev.push(Math.round(hourlyRev));
-      overnightDailyRev.push(Math.round(overnightRev));
-      monthlyDailyRev.push(Math.round(monthlyStreamRev));
-      
+      hourlyDailyRev.push(Math.round(dayData.hourlyRevenue));
+      overnightDailyRev.push(Math.round(dayData.overnightRevenue));
+      monthlyDailyRev.push(Math.round(dayData.monthlyStreamRevenue));
       days.push(`Day ${day}`);
 
-      mockData.push({
+      tableData.push({
         loggedDate: date.toISODate(),
-        carAmount: carCount,
-        motorAmount: motorCount,
-        truckAmount: truckCount,
-        carRevenue: carRev,
-        motorRevenue: motorRev,
-        truckRevenue: truckRev,
-        hourlyRevenue: hourlyRev,
-        overnightRevenue: overnightRev,
-        monthlyStreamRevenue: monthlyStreamRev,
-        totalEntries: carCount + motorCount + truckCount,
-        totalRevenue: carRev + motorRev + truckRev
+        ...dayData
       });
     }
 
-    this.dataSource.data = mockData.reverse();
-    
+    this.dataSource.data = tableData.reverse();
+
     this.totalRevenue.set(cumulativeRevenue);
     this.averageDailyRevenue.set(Math.round(cumulativeRevenue / daysInMonth));
     this.totalEntries.set(entries);

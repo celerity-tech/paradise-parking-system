@@ -1,0 +1,18 @@
+query MonthlyTransactions($year: Int!, $month: Int!) {
+  monthlyTransactions(year: $year, month: $month) {
+    id
+    plateNumber
+    enteredAt
+    exitedAt
+    durationMinutes
+    rateType
+    occuranceDate
+    monthlyStart
+    monthlyEnd
+    parkingFee
+    paymentStatus
+    includeInBIRReport
+    vehicleType
+    parkingState
+  }
+}
