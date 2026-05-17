@@ -1,0 +1,41 @@
+query MonthlySubscriptionAnalytics(
+  $referenceDate: String
+  $trendMonths: Int
+  $expiringWindowDays: Int
+  $capacity: Int
+) {
+  monthlySubscriptionAnalytics(
+    referenceDate: $referenceDate
+    trendMonths: $trendMonths
+    expiringWindowDays: $expiringWindowDays
+    capacity: $capacity
+  ) {
+    activeSubscribers
+    expiringSoon
+    expired
+    newThisMonth
+    totalSubscriptions
+    monthlyRecurringRevenue
+    growthRate
+    retentionRate
+    renewalRate
+    previousMonthActive
+    previousMonthNew
+    averageSubscriptionValue
+    utilizationCapacity
+    utilizationRate
+    vehicleBreakdown {
+      cars
+      motorcycles
+      trucks
+    }
+    trend {
+      label
+      monthKey
+      newSubscribers
+      expired
+      activeAtEnd
+      recurringRevenue
+    }
+  }
+}

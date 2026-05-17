@@ -2,8 +2,22 @@ query MonthlySessions(
     $page: Int!
     $limit: Int!
     $rateType: String!
+    $search: String
+    $vehicleType: VehicleType
+    $subscriptionStatus: String
+    $referenceDate: String
+    $expiringWindowDays: Int
 ) {
-    monthlySessions(page: $page, limit: $limit, rateType: $rateType) {
+    monthlySessions(
+        page: $page
+        limit: $limit
+        rateType: $rateType
+        search: $search
+        vehicleType: $vehicleType
+        subscriptionStatus: $subscriptionStatus
+        referenceDate: $referenceDate
+        expiringWindowDays: $expiringWindowDays
+    ) {
         data {
             id
             vehicleType
@@ -23,6 +37,9 @@ query MonthlySessions(
             total
             page
             totalPages
+            hasNextPage
+            hasPreviousPage
+            limit
         }
     }
 }

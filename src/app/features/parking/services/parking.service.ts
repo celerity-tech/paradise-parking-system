@@ -5,20 +5,23 @@ import { Apollo } from 'apollo-angular';
 import { HttpClient } from '@angular/common/http';
 
 import { PaginatedResponse } from '../../../shared/types/paginated-response.type';
-import { 
+import {
   CreateMonthlySessionDocument,
-  CreateParkingSessionDocument, 
-  ExitParkingSessionDocument, 
-  GetParkingSessionsDocument, 
-  GetParkingSessionsQuery, 
-  GetParkingSessionsQueryVariables, 
-  GetParkingStatisticsDocument, 
-  GetParkingStatisticsQuery, 
-  GetParkingStatisticsQueryVariables, 
-  MonthlySessionsDocument, 
-  MonthlySessionsQuery, 
-  MonthlySessionsQueryVariables, 
-  ParkingSession 
+  CreateParkingSessionDocument,
+  ExitParkingSessionDocument,
+  GetParkingSessionsDocument,
+  GetParkingSessionsQuery,
+  GetParkingSessionsQueryVariables,
+  GetParkingStatisticsDocument,
+  GetParkingStatisticsQuery,
+  GetParkingStatisticsQueryVariables,
+  MonthlySessionsDocument,
+  MonthlySessionsQuery,
+  MonthlySessionsQueryVariables,
+  MonthlySubscriptionAnalyticsDocument,
+  MonthlySubscriptionAnalyticsQuery,
+  MonthlySubscriptionAnalyticsQueryVariables,
+  ParkingSession
 } from '../../../../graphql/generated/graphql';
 import { environment } from '../../../../environments/environment';
 
@@ -147,6 +150,19 @@ export class ParkingService {
       variables,
       fetchPolicy: 'network-only'
     })
+  }
+
+  getMonthlySubscriptionAnalytics(
+    variables: MonthlySubscriptionAnalyticsQueryVariables = {}
+  ): Observable<MonthlySubscriptionAnalyticsQuery['monthlySubscriptionAnalytics'] | null> {
+    return this.apollo.watchQuery<MonthlySubscriptionAnalyticsQuery, MonthlySubscriptionAnalyticsQueryVariables>({
+      query: MonthlySubscriptionAnalyticsDocument,
+      variables,
+      fetchPolicy: 'network-only',
+    }).valueChanges.pipe(
+      map(result => (result.data?.monthlySubscriptionAnalytics ?? null) as
+        MonthlySubscriptionAnalyticsQuery['monthlySubscriptionAnalytics'] | null)
+    );
   }
 
   retryPrintEntryTicket(sessionId: string) {
