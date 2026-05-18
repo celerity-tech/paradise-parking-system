@@ -4,7 +4,8 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 
 import { DateTime } from 'luxon';
-import { Banknote, Car, Clock, LucideAngularModule, Motorbike, Truck } from 'lucide-angular';
+import { Banknote, Car, Clock, LucideAngularModule, Motorbike, Pencil, Truck } from 'lucide-angular';
+import { MatDialog } from '@angular/material/dialog';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -19,9 +20,10 @@ import type { ECharts } from 'echarts/core';
 import { ParkingService } from '../../../parking/services/parking.service';
 import { ParkingStatistics } from '../../../../../graphql/generated/graphql';
 import { formatMinutes } from '../../../../shared/utils/formatters.utils';
-import { Button } from "../../../../shared/ui/button/button";
 import { ReportsService } from '../../services/reports.service';
 import { PesoPipe } from '../../../../shared/pipes/peso-pipe';
+import { EditDailyDialog } from '../../components/edit-daily-dialog/edit-daily-dialog';
+import { AuthService } from '../../../auth/services/auth';
 
 type SessionState = 'ACTIVE' | 'EXITED';
 
@@ -39,7 +41,6 @@ type SessionState = 'ACTIVE' | 'EXITED';
     DatePipe,
     NgClass,
     NgxEchartsDirective,
-    Button,
     PesoPipe
 ],
   templateUrl: './daily-breakdown.html',
@@ -51,12 +52,17 @@ export class DailyBreakdown {
   readonly Clock = Clock;
   readonly Motorbike = Motorbike;
   readonly Truck = Truck;
+  readonly Pencil = Pencil;
 
   private parkingService = inject(ParkingService);
   private destroy$ = new Subject<void>();
   private destroyRef = inject(DestroyRef);
   private reportsService = inject(ReportsService);
   private cdr = inject(ChangeDetectorRef);
+  private dialog = inject(MatDialog);
+  private authService = inject(AuthService);
+
+  readonly canEdit = ['admin', 'superadmin'].includes(this.authService.getRole() ?? '');
 
   formatMinutes = formatMinutes;
 
@@ -166,6 +172,30 @@ export class DailyBreakdown {
         console.error('Error fetching parking statistics:', err);
       }
     })
+  }
+
+  onEditSession(row: any): void {
+    const dialogRef = this.dialog.open(EditDailyDialog, {
+      data: {
+        session: {
+          id: row.id,
+          plateNumber: row.plateNumber,
+          enteredAt: row.enteredAt,
+          exitedAt: row.exitedAt,
+          parkingFee: row.parkingFee,
+        },
+      },
+    });
+
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(result => {
+        if (result) {
+          this.loadSessions();
+          this.fetchParkingStatistics();
+        }
+      });
   }
 
   markSessionAsIncludedInBIR(id: string) {

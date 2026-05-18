@@ -7,6 +7,12 @@ import { HttpClient } from '@angular/common/http';
 import { PaginatedResponse } from '../../../shared/types/paginated-response.type';
 import {
   CreateMonthlySessionDocument,
+  UpdateMonthlySessionDocument,
+  UpdateMonthlySessionMutation,
+  UpdateMonthlySessionMutationVariables,
+  UpdateParkingSessionDocument,
+  UpdateParkingSessionMutation,
+  UpdateParkingSessionMutationVariables,
   CreateParkingSessionDocument,
   ExitParkingSessionDocument,
   GetParkingSessionsDocument,
@@ -91,6 +97,20 @@ export class ParkingService {
         }
       ],
     })
+  }
+
+  updateMonthlySession(input: UpdateMonthlySessionMutationVariables['input']) {
+    return this.apollo.mutate<UpdateMonthlySessionMutation, UpdateMonthlySessionMutationVariables>({
+      mutation: UpdateMonthlySessionDocument,
+      variables: { input },
+    });
+  }
+
+  updateParkingSession(input: UpdateParkingSessionMutationVariables['input']) {
+    return this.apollo.mutate<UpdateParkingSessionMutation, UpdateParkingSessionMutationVariables>({
+      mutation: UpdateParkingSessionDocument,
+      variables: { input },
+    });
   }
 
   getMonthlySessions(

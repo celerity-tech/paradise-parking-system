@@ -5,7 +5,7 @@ import { routes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
 import { provideApollo } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
-import { InMemoryCache } from '@apollo/client';
+import { InMemoryCache, ApolloLink } from '@apollo/client';
 
 import { provideLuxonDateAdapter } from '@angular/material-luxon-adapter';
 import { DEFAULT_DATE_FORMAT } from './shared/utils/date-format';
@@ -32,10 +32,23 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(), 
     provideApollo(() => {
       const httpLink = inject(HttpLink);
+      const authLink = new ApolloLink((operation, forward) => {
+        const token = typeof localStorage !== 'undefined'
+          ? localStorage.getItem('sex-sex-iyot')
+          : null;
+        if (token) {
+          operation.setContext(({ headers = {} }: { headers?: Record<string, string> }) => ({
+            headers: { ...headers, Authorization: `Bearer ${token}` },
+          }));
+        }
+        return forward(operation);
+      });
+
       return {
-        link: httpLink.create({
-          uri: environment.apiBaseUrl + '/graphql',
-        }),
+        link: ApolloLink.from([
+          authLink,
+          httpLink.create({ uri: environment.apiBaseUrl + '/graphql' }),
+        ]),
         cache: new InMemoryCache(),
       };
     })

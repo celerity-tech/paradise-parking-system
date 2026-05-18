@@ -35,6 +35,7 @@ import {
   Filter,
   LucideAngularModule,
   Motorbike,
+  Pencil,
   RefreshCw,
   Search,
   Sparkles,
@@ -54,6 +55,8 @@ import type { ECharts } from 'echarts/core';
 import { Button } from '../../../../shared/ui/button/button';
 import { PesoPipe } from '../../../../shared/pipes/peso-pipe';
 import { AddMonthlyDialog } from '../../components/add-monthly-dialog/add-monthly-dialog';
+import { EditMonthlyDialog } from '../../components/edit-monthly-dialog/edit-monthly-dialog';
+import { AuthService } from '../../../auth/services/auth';
 import { ParkingService } from '../../../parking/services/parking.service';
 import {
   MonthlySubscriptionAnalyticsQuery,
@@ -116,11 +119,15 @@ export class MonthlyParking implements OnInit {
   readonly CrownIcon = Crown;
   readonly WalletIcon = Wallet;
   readonly ActivityIcon = Activity;
+  readonly PencilIcon = Pencil;
 
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
   private readonly parkingService = inject(ParkingService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly authService = inject(AuthService);
+
+  readonly canEdit = ['admin', 'superadmin'].includes(this.authService.getRole() ?? '');
 
   readonly DISPLAYED_COLUMNS = [
     'vehicleType',
@@ -130,6 +137,7 @@ export class MonthlyParking implements OnInit {
     'daysRemaining',
     'parkingFee',
     'status',
+    'actions',
   ] as const;
 
   readonly searchControl = new FormControl<string>('', { nonNullable: true });
@@ -282,6 +290,29 @@ export class MonthlyParking implements OnInit {
 
   onAddVehicle(): void {
     const dialogRef = this.dialog.open(AddMonthlyDialog);
+
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(result => {
+        if (result) {
+          this.loadAll();
+        }
+      });
+  }
+
+  onEditSubscriber(row: SubscriberRow): void {
+    const dialogRef = this.dialog.open(EditMonthlyDialog, {
+      data: {
+        session: {
+          id: row.id,
+          plateNumber: row.plateNumber,
+          monthlyStart: row.monthlyStart,
+          monthlyEnd: row.monthlyEnd,
+          parkingFee: row.parkingFee,
+        },
+      },
+    });
 
     dialogRef
       .afterClosed()

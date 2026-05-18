@@ -1,0 +1,14 @@
+mutation UpdateMonthlySession($input: UpdateMonthlySessionInput!) {
+    updateMonthlySession(input: $input) {
+        id
+        vehicleType
+        plateNumber
+        enteredAt
+        paymentStatus
+        parkingState
+        rateType
+        parkingFee
+        monthlyStart
+        monthlyEnd
+    }
+}

@@ -1,0 +1,15 @@
+mutation UpdateParkingSession($input: UpdateParkingSessionInput!) {
+    updateParkingSession(input: $input) {
+        id
+        vehicleType
+        plateNumber
+        enteredAt
+        exitedAt
+        durationMinutes
+        parkingFee
+        paymentStatus
+        parkingState
+        rateType
+        includeInBIRReport
+    }
+}

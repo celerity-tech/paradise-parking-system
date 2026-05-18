@@ -93,10 +93,33 @@
       <ng-container cdkColumnDef="actions">
         <th cdk-header-cell *cdkHeaderCellDef class="text-right px-6 py-4 text-xs text-white whitespace-nowrap">ACTIONS</th>
         <td cdk-cell *cdkCellDef="let element" class="text-right px-6 py-4 text-text-600 text-sm">
-          <app-button
-            [disabled]="element.includeInBIRReport"
-            (click)="markSessionAsIncludedInBIR(element.id)"
-          >TTB</app-button>
+          <div class="inline-flex items-center gap-2 justify-end">
+            @if (canEdit) {
+              <button
+                type="button"
+                (click)="onEditSession(element)"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md hover:bg-emerald-100 cursor-pointer"
+                title="Edit transaction"
+              >
+                <lucide-angular [img]="Pencil" class="w-3.5 h-3.5"></lucide-angular>
+                Edit
+              </button>
+            }
+            <button
+              type="button"
+              [disabled]="element.includeInBIRReport"
+              (click)="markSessionAsIncludedInBIR(element.id)"
+              [class.cursor-pointer]="!element.includeInBIRReport"
+              [class.cursor-not-allowed]="element.includeInBIRReport"
+              [ngClass]="element.includeInBIRReport
+                ? 'bg-slate-100 text-slate-400 border-slate-200'
+                : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'"
+              class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold border rounded-md tracking-wide"
+              [title]="element.includeInBIRReport ? 'Already tagged in BIR report' : 'Tag to BIR report'"
+            >
+              TTB
+            </button>
+          </div>
         </td>
       </ng-container>
 

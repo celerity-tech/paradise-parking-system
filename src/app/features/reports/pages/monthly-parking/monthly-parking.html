@@ -262,10 +262,11 @@
 
       <div class="flex flex-col sm:flex-row sm:items-center gap-2">
         <div class="relative">
-          <lucide-angular
-            [img]="SearchIcon"
-            class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-400"
-          ></lucide-angular>
+          <span
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-text-400 flex items-center justify-center pointer-events-none"
+          >
+            <lucide-angular [img]="SearchIcon" class="w-4 h-4 block"></lucide-angular>
+          </span>
           <input
             type="text"
             [formControl]="searchControl"
@@ -276,7 +277,7 @@
 
         <select
           [formControl]="vehicleControl"
-          class="px-3 py-2 text-sm border border-slate-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 cursor-pointer"
+          class="px-3 py-2 pr-8 text-sm border border-slate-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 cursor-pointer"
         >
           <option value="">All vehicles</option>
           <option value="CAR">Cars</option>
@@ -393,6 +394,25 @@
               ></span>
               {{ element.derivedStatus | titlecase }}
             </span>
+          </td>
+        </ng-container>
+
+        <ng-container cdkColumnDef="actions">
+          <th cdk-header-cell *cdkHeaderCellDef class="text-right px-6 py-3 text-xs font-semibold text-text-500 uppercase tracking-wider bg-slate-50">Actions</th>
+          <td cdk-cell *cdkCellDef="let element" class="px-6 py-3 text-right">
+            @if (canEdit) {
+              <button
+                type="button"
+                (click)="onEditSubscriber(element)"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md hover:bg-emerald-100 cursor-pointer"
+                title="Edit subscriber"
+              >
+                <lucide-angular [img]="PencilIcon" class="w-3.5 h-3.5"></lucide-angular>
+                Edit
+              </button>
+            } @else {
+              <span class="text-xs text-text-400">—</span>
+            }
           </td>
         </ng-container>
 

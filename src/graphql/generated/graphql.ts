@@ -33,12 +33,44 @@ export type CreateParkingSessionInput = {
   vehicleType: Scalars['String']['input'];
 };
 
+export type MonthlySubscriptionAnalytics = {
+  __typename?: 'MonthlySubscriptionAnalytics';
+  activeSubscribers: Scalars['Int']['output'];
+  averageSubscriptionValue: Scalars['Float']['output'];
+  expired: Scalars['Int']['output'];
+  expiringSoon: Scalars['Int']['output'];
+  growthRate: Scalars['Float']['output'];
+  monthlyRecurringRevenue: Scalars['Float']['output'];
+  newThisMonth: Scalars['Int']['output'];
+  previousMonthActive: Scalars['Int']['output'];
+  previousMonthNew: Scalars['Int']['output'];
+  renewalRate: Scalars['Float']['output'];
+  retentionRate: Scalars['Float']['output'];
+  totalSubscriptions: Scalars['Int']['output'];
+  trend: Array<MonthlySubscriptionTrendPoint>;
+  utilizationCapacity: Scalars['Int']['output'];
+  utilizationRate: Scalars['Float']['output'];
+  vehicleBreakdown: VehicleBreakdown;
+};
+
+export type MonthlySubscriptionTrendPoint = {
+  __typename?: 'MonthlySubscriptionTrendPoint';
+  activeAtEnd: Scalars['Int']['output'];
+  expired: Scalars['Int']['output'];
+  label: Scalars['String']['output'];
+  monthKey: Scalars['String']['output'];
+  newSubscribers: Scalars['Int']['output'];
+  recurringRevenue: Scalars['Float']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createMonthlySession: ParkingSession;
   createParkingSession: ParkingSession;
   exitParkingSession: ParkingSession;
   includeParkingSessionInBIR: ParkingSession;
+  updateMonthlySession: ParkingSession;
+  updateParkingSession: ParkingSession;
 };
 
 
@@ -59,6 +91,16 @@ export type MutationExitParkingSessionArgs = {
 
 export type MutationIncludeParkingSessionInBirArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateMonthlySessionArgs = {
+  input: UpdateMonthlySessionInput;
+};
+
+
+export type MutationUpdateParkingSessionArgs = {
+  input: UpdateParkingSessionInput;
 };
 
 export type PaginatedParkingSessions = {
@@ -100,7 +142,9 @@ export type ParkingSession = {
 
 export enum ParkingState {
   Active = 'ACTIVE',
-  Exited = 'EXITED'
+  Cancelled = 'CANCELLED',
+  Exited = 'EXITED',
+  Inactive = 'INACTIVE'
 }
 
 export type ParkingStatistics = {
@@ -110,43 +154,6 @@ export type ParkingStatistics = {
   parkedVehicles: Scalars['Int']['output'];
   revenueToday: Scalars['Float']['output'];
   totalEntriesToday: Scalars['Int']['output'];
-};
-
-export type VehicleBreakdown = {
-  __typename?: 'VehicleBreakdown';
-  cars: Scalars['Int']['output'];
-  motorcycles: Scalars['Int']['output'];
-  trucks: Scalars['Int']['output'];
-};
-
-export type MonthlySubscriptionTrendPoint = {
-  __typename?: 'MonthlySubscriptionTrendPoint';
-  label: Scalars['String']['output'];
-  monthKey: Scalars['String']['output'];
-  newSubscribers: Scalars['Int']['output'];
-  expired: Scalars['Int']['output'];
-  activeAtEnd: Scalars['Int']['output'];
-  recurringRevenue: Scalars['Float']['output'];
-};
-
-export type MonthlySubscriptionAnalytics = {
-  __typename?: 'MonthlySubscriptionAnalytics';
-  activeSubscribers: Scalars['Int']['output'];
-  expiringSoon: Scalars['Int']['output'];
-  expired: Scalars['Int']['output'];
-  newThisMonth: Scalars['Int']['output'];
-  totalSubscriptions: Scalars['Int']['output'];
-  monthlyRecurringRevenue: Scalars['Float']['output'];
-  growthRate: Scalars['Float']['output'];
-  retentionRate: Scalars['Float']['output'];
-  renewalRate: Scalars['Float']['output'];
-  previousMonthActive: Scalars['Int']['output'];
-  previousMonthNew: Scalars['Int']['output'];
-  averageSubscriptionValue: Scalars['Float']['output'];
-  utilizationCapacity: Scalars['Int']['output'];
-  utilizationRate: Scalars['Float']['output'];
-  vehicleBreakdown: VehicleBreakdown;
-  trend: Array<MonthlySubscriptionTrendPoint>;
 };
 
 export enum PaymentStatus {
@@ -168,22 +175,22 @@ export type Query = {
 
 
 export type QueryMonthlySessionsArgs = {
+  expiringWindowDays?: InputMaybe<Scalars['Int']['input']>;
   limit: Scalars['Int']['input'];
   page: Scalars['Int']['input'];
   rateType: Scalars['String']['input'];
-  search?: InputMaybe<Scalars['String']['input']>;
-  vehicleType?: InputMaybe<VehicleType>;
-  subscriptionStatus?: InputMaybe<Scalars['String']['input']>;
   referenceDate?: InputMaybe<Scalars['String']['input']>;
-  expiringWindowDays?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  subscriptionStatus?: InputMaybe<Scalars['String']['input']>;
+  vehicleType?: InputMaybe<VehicleType>;
 };
 
 
 export type QueryMonthlySubscriptionAnalyticsArgs = {
+  capacity?: InputMaybe<Scalars['Int']['input']>;
+  expiringWindowDays?: InputMaybe<Scalars['Int']['input']>;
   referenceDate?: InputMaybe<Scalars['String']['input']>;
   trendMonths?: InputMaybe<Scalars['Int']['input']>;
-  expiringWindowDays?: InputMaybe<Scalars['Int']['input']>;
-  capacity?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -228,6 +235,29 @@ export enum RateType {
   Overnight = 'OVERNIGHT'
 }
 
+export type UpdateMonthlySessionInput = {
+  id: Scalars['ID']['input'];
+  monthlyEnd?: InputMaybe<Scalars['DateTime']['input']>;
+  monthlyStart?: InputMaybe<Scalars['DateTime']['input']>;
+  parkingFee?: InputMaybe<Scalars['Float']['input']>;
+  plateNumber?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateParkingSessionInput = {
+  enteredAt?: InputMaybe<Scalars['DateTime']['input']>;
+  exitedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  id: Scalars['ID']['input'];
+  parkingFee?: InputMaybe<Scalars['Float']['input']>;
+  plateNumber?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type VehicleBreakdown = {
+  __typename?: 'VehicleBreakdown';
+  cars: Scalars['Int']['output'];
+  motorcycles: Scalars['Int']['output'];
+  trucks: Scalars['Int']['output'];
+};
+
 export type VehicleStats = {
   __typename?: 'VehicleStats';
   name: Scalars['String']['output'];
@@ -261,6 +291,20 @@ export type ExitParkingSessionMutationVariables = Exact<{
 
 export type ExitParkingSessionMutation = { __typename?: 'Mutation', exitParkingSession: { __typename?: 'ParkingSession', id: string, parkingState: ParkingState, exitedAt?: any | null, paymentStatus: PaymentStatus } };
 
+export type UpdateMonthlySessionMutationVariables = Exact<{
+  input: UpdateMonthlySessionInput;
+}>;
+
+
+export type UpdateMonthlySessionMutation = { __typename?: 'Mutation', updateMonthlySession: { __typename?: 'ParkingSession', id: string, vehicleType: VehicleType, plateNumber: string, enteredAt: any, paymentStatus: PaymentStatus, parkingState: ParkingState, rateType: RateType, parkingFee?: number | null, monthlyStart?: any | null, monthlyEnd?: any | null } };
+
+export type UpdateParkingSessionMutationVariables = Exact<{
+  input: UpdateParkingSessionInput;
+}>;
+
+
+export type UpdateParkingSessionMutation = { __typename?: 'Mutation', updateParkingSession: { __typename?: 'ParkingSession', id: string, vehicleType: VehicleType, plateNumber: string, enteredAt: any, exitedAt?: any | null, durationMinutes?: number | null, parkingFee?: number | null, paymentStatus: PaymentStatus, parkingState: ParkingState, rateType: RateType, includeInBIRReport: boolean } };
+
 export type MonthlySessionsQueryVariables = Exact<{
   page: Scalars['Int']['input'];
   limit: Scalars['Int']['input'];
@@ -274,16 +318,6 @@ export type MonthlySessionsQueryVariables = Exact<{
 
 
 export type MonthlySessionsQuery = { __typename?: 'Query', monthlySessions: { __typename?: 'PaginatedParkingSessions', data: Array<{ __typename?: 'ParkingSession', id: string, vehicleType: VehicleType, plateNumber: string, enteredAt: any, exitedAt?: any | null, durationMinutes?: number | null, parkingFee?: number | null, parkingState: ParkingState, paymentStatus: PaymentStatus, rateType: RateType, includeInBIRReport: boolean, monthlyStart?: any | null, monthlyEnd?: any | null }>, meta: { __typename?: 'PaginationMeta', total: number, page: number, totalPages: number, hasNextPage: boolean, hasPreviousPage: boolean, limit: number } } };
-
-export type MonthlySubscriptionAnalyticsQueryVariables = Exact<{
-  referenceDate?: InputMaybe<Scalars['String']['input']>;
-  trendMonths?: InputMaybe<Scalars['Int']['input']>;
-  expiringWindowDays?: InputMaybe<Scalars['Int']['input']>;
-  capacity?: InputMaybe<Scalars['Int']['input']>;
-}>;
-
-
-export type MonthlySubscriptionAnalyticsQuery = { __typename?: 'Query', monthlySubscriptionAnalytics: { __typename?: 'MonthlySubscriptionAnalytics', activeSubscribers: number, expiringSoon: number, expired: number, newThisMonth: number, totalSubscriptions: number, monthlyRecurringRevenue: number, growthRate: number, retentionRate: number, renewalRate: number, previousMonthActive: number, previousMonthNew: number, averageSubscriptionValue: number, utilizationCapacity: number, utilizationRate: number, vehicleBreakdown: { __typename?: 'VehicleBreakdown', cars: number, motorcycles: number, trucks: number }, trend: Array<{ __typename?: 'MonthlySubscriptionTrendPoint', label: string, monthKey: string, newSubscribers: number, expired: number, activeAtEnd: number, recurringRevenue: number }> } };
 
 export type GetParkingSessionsQueryVariables = Exact<{
   page: Scalars['Int']['input'];
@@ -311,6 +345,16 @@ export type IncludeParkingSessionInBirMutationVariables = Exact<{
 
 
 export type IncludeParkingSessionInBirMutation = { __typename?: 'Mutation', includeParkingSessionInBIR: { __typename?: 'ParkingSession', id: string, vehicleType: VehicleType, plateNumber: string, enteredAt: any, exitedAt?: any | null, durationMinutes?: number | null, parkingFee?: number | null, parkingState: ParkingState, paymentStatus: PaymentStatus, includeInBIRReport: boolean } };
+
+export type MonthlySubscriptionAnalyticsQueryVariables = Exact<{
+  referenceDate?: InputMaybe<Scalars['String']['input']>;
+  trendMonths?: InputMaybe<Scalars['Int']['input']>;
+  expiringWindowDays?: InputMaybe<Scalars['Int']['input']>;
+  capacity?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type MonthlySubscriptionAnalyticsQuery = { __typename?: 'Query', monthlySubscriptionAnalytics: { __typename?: 'MonthlySubscriptionAnalytics', activeSubscribers: number, expiringSoon: number, expired: number, newThisMonth: number, totalSubscriptions: number, monthlyRecurringRevenue: number, growthRate: number, retentionRate: number, renewalRate: number, previousMonthActive: number, previousMonthNew: number, averageSubscriptionValue: number, utilizationCapacity: number, utilizationRate: number, vehicleBreakdown: { __typename?: 'VehicleBreakdown', cars: number, motorcycles: number, trucks: number }, trend: Array<{ __typename?: 'MonthlySubscriptionTrendPoint', label: string, monthKey: string, newSubscribers: number, expired: number, activeAtEnd: number, recurringRevenue: number }> } };
 
 export type MonthlyTransactionsQueryVariables = Exact<{
   year: Scalars['Int']['input'];
@@ -390,6 +434,61 @@ export const ExitParkingSessionDocument = gql`
       super(apollo);
     }
   }
+export const UpdateMonthlySessionDocument = gql`
+    mutation UpdateMonthlySession($input: UpdateMonthlySessionInput!) {
+  updateMonthlySession(input: $input) {
+    id
+    vehicleType
+    plateNumber
+    enteredAt
+    paymentStatus
+    parkingState
+    rateType
+    parkingFee
+    monthlyStart
+    monthlyEnd
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class UpdateMonthlySessionGQL extends Apollo.Mutation<UpdateMonthlySessionMutation, UpdateMonthlySessionMutationVariables> {
+    override document = UpdateMonthlySessionDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const UpdateParkingSessionDocument = gql`
+    mutation UpdateParkingSession($input: UpdateParkingSessionInput!) {
+  updateParkingSession(input: $input) {
+    id
+    vehicleType
+    plateNumber
+    enteredAt
+    exitedAt
+    durationMinutes
+    parkingFee
+    paymentStatus
+    parkingState
+    rateType
+    includeInBIRReport
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class UpdateParkingSessionGQL extends Apollo.Mutation<UpdateParkingSessionMutation, UpdateParkingSessionMutationVariables> {
+    override document = UpdateParkingSessionDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
 export const MonthlySessionsDocument = gql`
     query MonthlySessions($page: Int!, $limit: Int!, $rateType: String!, $search: String, $vehicleType: VehicleType, $subscriptionStatus: String, $referenceDate: String, $expiringWindowDays: Int) {
   monthlySessions(
@@ -434,56 +533,7 @@ export const MonthlySessionsDocument = gql`
   })
   export class MonthlySessionsGQL extends Apollo.Query<MonthlySessionsQuery, MonthlySessionsQueryVariables> {
     override document = MonthlySessionsDocument;
-
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const MonthlySubscriptionAnalyticsDocument = gql`
-    query MonthlySubscriptionAnalytics($referenceDate: String, $trendMonths: Int, $expiringWindowDays: Int, $capacity: Int) {
-  monthlySubscriptionAnalytics(
-    referenceDate: $referenceDate
-    trendMonths: $trendMonths
-    expiringWindowDays: $expiringWindowDays
-    capacity: $capacity
-  ) {
-    activeSubscribers
-    expiringSoon
-    expired
-    newThisMonth
-    totalSubscriptions
-    monthlyRecurringRevenue
-    growthRate
-    retentionRate
-    renewalRate
-    previousMonthActive
-    previousMonthNew
-    averageSubscriptionValue
-    utilizationCapacity
-    utilizationRate
-    vehicleBreakdown {
-      cars
-      motorcycles
-      trucks
-    }
-    trend {
-      label
-      monthKey
-      newSubscribers
-      expired
-      activeAtEnd
-      recurringRevenue
-    }
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class MonthlySubscriptionAnalyticsGQL extends Apollo.Query<MonthlySubscriptionAnalyticsQuery, MonthlySubscriptionAnalyticsQueryVariables> {
-    override document = MonthlySubscriptionAnalyticsDocument;
-
+    
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
     }
@@ -577,6 +627,55 @@ export const IncludeParkingSessionInBirDocument = gql`
   })
   export class IncludeParkingSessionInBirGQL extends Apollo.Mutation<IncludeParkingSessionInBirMutation, IncludeParkingSessionInBirMutationVariables> {
     override document = IncludeParkingSessionInBirDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const MonthlySubscriptionAnalyticsDocument = gql`
+    query MonthlySubscriptionAnalytics($referenceDate: String, $trendMonths: Int, $expiringWindowDays: Int, $capacity: Int) {
+  monthlySubscriptionAnalytics(
+    referenceDate: $referenceDate
+    trendMonths: $trendMonths
+    expiringWindowDays: $expiringWindowDays
+    capacity: $capacity
+  ) {
+    activeSubscribers
+    expiringSoon
+    expired
+    newThisMonth
+    totalSubscriptions
+    monthlyRecurringRevenue
+    growthRate
+    retentionRate
+    renewalRate
+    previousMonthActive
+    previousMonthNew
+    averageSubscriptionValue
+    utilizationCapacity
+    utilizationRate
+    vehicleBreakdown {
+      cars
+      motorcycles
+      trucks
+    }
+    trend {
+      label
+      monthKey
+      newSubscribers
+      expired
+      activeAtEnd
+      recurringRevenue
+    }
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class MonthlySubscriptionAnalyticsGQL extends Apollo.Query<MonthlySubscriptionAnalyticsQuery, MonthlySubscriptionAnalyticsQueryVariables> {
+    override document = MonthlySubscriptionAnalyticsDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
